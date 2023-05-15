@@ -47,9 +47,10 @@ def main():
                 if move in validMoves:
                     gs.makeMove(move)
                     moveMade = True
-                    drawGameState(screen, gs)
-                sqSelected =()
-                playerClicks =[]
+                    sqSelected =()
+                    playerClicks =[]
+                else:
+                    playerClicks = [sqSelected]
 
          elif e.type == p.KEYDOWN:
             if e.key == p.K_z:
@@ -59,7 +60,7 @@ def main():
       if moveMade:
           validMoves = gs.getValidMoves()
           moveMade=False
-          drawGameState(screen, gs)
+
 
       drawGameState(screen, gs)
       clock.tick(MAX_FPS)
@@ -81,7 +82,6 @@ def drawBoard(screen):
             p.draw.rect(screen, color, p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 def drawPieces(screen, board):
-    drawBoard(screen)
     for r in range(DIMENSION):
         for c in range(DIMENSION):
             piece = board[r][c]
