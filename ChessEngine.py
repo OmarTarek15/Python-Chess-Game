@@ -109,6 +109,8 @@ class GameState():
                         self.board[move.endRow][move.endCol - 2] = self.board[move.endRow][
                             move.endCol + 1]  # remove the rook from its new location to the rook old location
                         self.board[move.endRow][move.endCol + 1] = '--'  # create a blank space where the rook was
+                self.checkMate = False
+                self.staleMate = False        
 
     def updateCastleRight(self, move):
         if move.pieceMoved == 'wK':
