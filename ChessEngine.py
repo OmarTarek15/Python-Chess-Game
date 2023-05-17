@@ -2,8 +2,6 @@
 This class is responsibale for storing all the information about the current state of chess game. it will also be
 responsible for determining the valid moves at the current state.it will also keep a move log.
 """
-
-
 class GameState():
     def __init__(self):
         # board is an 8x8 2d list, each element of the list has 2 characters.
@@ -33,7 +31,8 @@ class GameState():
         self.staleMate = False
         self.enpassantPossible = ()  # coordinates for the square where enpassannt is possible
         self.enpassantPossibleLog = [self.enpassantPossible]
-        self.currentCastlingRights = CastleRights(True, True, True, True)  # to check if any of the caslting rules are broken ex:rook moved
+        self.currentCastlingRights = CastleRights(True, True, True,
+                                                  True)  # to check if any of the caslting rules are broken ex:rook moved
         self.caslteRightLog = [CastleRights(self.currentCastlingRights.wks, self.currentCastlingRights.bks,
                                             self.currentCastlingRights.wqs, self.currentCastlingRights.bqs)]
 
@@ -70,10 +69,9 @@ class GameState():
                 self.board[move.endRow][move.endCol + 1] = self.board[move.endRow][
                     move.endCol - 2]  # moves thw rook to the new square
                 self.board[move.endRow][move.endCol - 2] = '--'  # remove the old rook
-       
-       
+
         self.enpassantPossibleLog.append(self.enpassantPossible)
-       
+
         # update castle right --> if the king or rook move
         self.updateCastleRight(move)
         self.caslteRightLog.append(CastleRights(self.currentCastlingRights.wks, self.currentCastlingRights.bks,
@@ -95,7 +93,7 @@ class GameState():
                 self.board[move.endRow][move.endCol] = '--'  # leave square blank
                 self.board[move.startRow][move.endCol] = move.pieceCaptured
             self.enpassantPossibleLog.pop()
-            self.enpassantPossible = self.enpassantPossibleLog[-1]     
+            self.enpassantPossible = self.enpassantPossibleLog[-1]
 
             # undo castling rights
             self.caslteRightLog.pop()  # get rid of the new castle right
@@ -108,11 +106,11 @@ class GameState():
                         move.endCol - 1]  # remove the rook from its new location to the rook old location
                     self.board[move.endRow][move.endCol - 1] = '--'  # create a blank space where the rook was
                 else:  # queenside
-                        self.board[move.endRow][move.endCol - 2] = self.board[move.endRow][
-                            move.endCol + 1]  # remove the rook from its new location to the rook old location
-                        self.board[move.endRow][move.endCol + 1] = '--'  # create a blank space where the rook was
+                    self.board[move.endRow][move.endCol - 2] = self.board[move.endRow][
+                        move.endCol + 1]  # remove the rook from its new location to the rook old location
+                    self.board[move.endRow][move.endCol + 1] = '--'  # create a blank space where the rook was
                 self.checkMate = False
-                self.staleMate = False        
+                self.staleMate = False
 
     def updateCastleRight(self, move):
         if move.pieceMoved == 'wK':
@@ -137,12 +135,12 @@ class GameState():
             if move.endRow == 7:
                 if move.endCol == 0:
                     self.currentCastlingRights = False
-        elif move.pieceCaptured == 'bR' :
+        elif move.pieceCaptured == 'bR':
             if move.endRow == 0:
                 if move.endCol == 0:
                     self.currentCastlingRights = False
                 elif move.endCol == 7:
-                    self.currentCastlingRights =  False                      
+                    self.currentCastlingRights = False
 
     def getValidMoves(self):
         moves = []
@@ -383,9 +381,9 @@ class GameState():
                 moves.append(Move((r, c), (r, c + 2), self.board, isCastleMove=True))
 
     def getQueensideCastleMoves(self, r, c, moves):
-        if self.board[r][c - 1] == '--' and self.board[r][c - 2] == '--' and self.board[r][c - 3] == '--'and \
-             not self.squareUnderAttack(r, c - 1) and not self.squareUnderAttack(r, c - 2):
-                moves.append(Move((r, c), (r, c - 2), self.board, isCastleMove=True))
+        if self.board[r][c - 1] == '--' and self.board[r][c - 2] == '--' and self.board[r][c - 3] == '--' and \
+                not self.squareUnderAttack(r, c - 1) and not self.squareUnderAttack(r, c - 2):
+            moves.append(Move((r, c), (r, c - 2), self.board, isCastleMove=True))
 
     def checkForPinsAndChecks(self):
         pins = []
@@ -471,15 +469,17 @@ class Move():
         self.endCol = endSq[1]
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
+
+
         # Pawn promotion
         self.isPawnpromotion = (self.pieceMoved == 'wp' and self.endRow == 0) or (
-                    self.pieceMoved == 'bp' and self.endRow == 7)
+                self.pieceMoved == 'bp' and self.endRow == 7)
 
         # enpassant
         self.isEnpassantMove = isEnpassantMove
         if self.isEnpassantMove:
             self.pieceCaptured = 'wp' if self.pieceMoved == ' bp' else 'bp'
-
+        self.isCaptured = self.pieceCaptured
         # Castle move
         self.isCastleMove = isCastleMove
 
@@ -495,3 +495,19 @@ class Move():
 
     def getRankFile(self, r, c):
         return self.colsToFiles[c] + self.rowsToRanks[r]
+
+    def __str__(self):
+        if self.isCastleMove:
+            return "0-0" if self.endCol == 6 else "0-0-0"
+        endSquare = self.getRankFile(self.endRow, self.endCol)
+        if self.pieceMoved[1] == 'p':
+            if self.isCaptured:
+                return self.colsToFiles[self.startCol]+ "x" +endSquare
+
+            else:
+                return endSquare
+        moveString = self.pieceMoved[1]
+        if self.isCaptured:
+            moveString += 'x'
+        return moveString + endSquare
+
