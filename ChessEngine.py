@@ -1,6 +1,5 @@
 import random
 
-
 class GameState:
     def __init__(self):
         """

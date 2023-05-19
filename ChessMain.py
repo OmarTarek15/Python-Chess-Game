@@ -1,11 +1,11 @@
 import pygame as p
-import ChessEngine, SmartMoveFinder
+import ChessEngine
 import sys
 from multiprocessing import Process, Queue
 
-BOARD_WIDTH = BOARD_HEIGHT = 650
-MOVE_LOG_PANEL_WIDTH = 250
-MOVE_LOG_PANEL_HEIGHT = BOARD_HEIGHT
+import SmartMoveFinder
+import MinMaxPlayer
+BOARD_WIDTH = BOARD_HEIGHT = 512
 DIMENSION = 8
 SQUARE_SIZE = BOARD_HEIGHT // DIMENSION
 MAX_FPS = 15
@@ -35,6 +35,7 @@ def main():
     ai_thinking = False
     move_finder_process = None
 
+
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
@@ -45,16 +46,25 @@ def main():
             if not ai_thinking:
                 ai_thinking = True
                 return_queue = Queue()
-                move_finder_process = Process(
-                    target=SmartMoveFinder.findBestMove,
-                    args=(game_state, valid_moves, return_queue),
-                )
+                if game_state.white_to_move:
+                    move_finder_process = Process(
+                        target=SmartMoveFinder.findBestMove,
+                        args=(game_state, valid_moves, return_queue),
+                    )
+                else:
+                    move_finder_process = Process(
+                        target=MinMaxPlayer.findBestMove,
+                        args=(game_state, valid_moves, return_queue),
+                    )
                 move_finder_process.start()
 
             if not move_finder_process.is_alive():
                 ai_move = return_queue.get()
                 if ai_move is None:
-                    ai_move = SmartMoveFinder.findRandomMove(valid_moves)
+                    if game_state.white_to_move:
+                        ai_move = SmartMoveFinder.findRandomMove(valid_moves)
+                    else:
+                        ai_move = MinMaxPlayer.findRandomMove(valid_moves)
                 game_state.makeMove(ai_move)
                 move_made = True
                 animate = True
@@ -66,10 +76,8 @@ def main():
             valid_moves = game_state.getValidMoves()
             move_made = False
             animate = False
-            move_undone = False
 
         drawGameState(screen, game_state, valid_moves, square_selected)
-
         if game_state.checkmate:
             if game_state.white_to_move:
                 drawEndGameText(screen, "Black wins by checkmate")
