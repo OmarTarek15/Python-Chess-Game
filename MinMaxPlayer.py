@@ -75,7 +75,7 @@ STALEMATE = 0
 DEPTH = 1
 
 
-def findBestMove(game_state, valid_moves, return_queue):
+def findBestMovee(game_state, valid_moves, return_queue):
     global next_move
     next_move = None
     random.shuffle(valid_moves)

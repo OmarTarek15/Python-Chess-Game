@@ -2,10 +2,12 @@ import pygame as p
 import ChessEngine
 import sys
 from multiprocessing import Process, Queue
-
 import SmartMoveFinder
 import MinMaxPlayer
+
 BOARD_WIDTH = BOARD_HEIGHT = 512
+MOVE_LOG_PANEL_WIDTH = 250
+MOVE_LOG_PANEL_HEIGHT = BOARD_HEIGHT
 DIMENSION = 8
 SQUARE_SIZE = BOARD_HEIGHT // DIMENSION
 MAX_FPS = 15
@@ -53,7 +55,7 @@ def main():
                     )
                 else:
                     move_finder_process = Process(
-                        target=MinMaxPlayer.findBestMove,
+                        target=MinMaxPlayer.findBestMovee,
                         args=(game_state, valid_moves, return_queue),
                     )
                 move_finder_process.start()
@@ -78,6 +80,7 @@ def main():
             animate = False
 
         drawGameState(screen, game_state, valid_moves, square_selected)
+
         if game_state.checkmate:
             if game_state.white_to_move:
                 drawEndGameText(screen, "Black wins by checkmate")
@@ -99,7 +102,7 @@ def drawGameState(screen, game_state, valid_moves, square_selected):
 
 def drawBoard(screen):
     global colors
-    colors = [p.Color("white"), p.Color("gray")]
+    colors = [p.Color("white"), p.Color("darkgreen")]
     for row in range(DIMENSION):
         for column in range(DIMENSION):
             color = colors[((row + column) % 2)]
@@ -117,7 +120,7 @@ def highlightSquares(screen, game_state, valid_moves, square_selected):
         last_move = game_state.move_log[-1]
         s = p.Surface((SQUARE_SIZE, SQUARE_SIZE))
         s.set_alpha(100)
-        s.fill(p.Color("green"))
+        s.fill(p.Color("blue"))
         screen.blit(
             s, (last_move.end_col * SQUARE_SIZE, last_move.end_row * SQUARE_SIZE)
         )
